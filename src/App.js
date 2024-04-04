@@ -2,18 +2,33 @@ import Navbar from './components/Navbar';
 import Container from './components/Container';
 import Loading from './components/Loading';
 import Error from './components/Error';
+import NewsList from './components/NewsList';
 
 import { getNews } from './services/getNews';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 function App() {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   
   useEffect(() => {
     const fetchTechNews = async () => {
+      setLoading(true);
+
       const res = await getNews({
         searchQuery: 'microsoft'
       });
-      console.log(res)
+
+      if(!res) {
+        setLoading(false);
+        setError(true);
+
+        return
+      }
+
+      setLoading(false);
+      setArticles(res.articles);
     }
 
     fetchTechNews();
@@ -23,7 +38,11 @@ function App() {
     <>
       <Navbar />
       <Container>
-        <h1>Hello World!</h1>
+        { loading && <Loading /> }
+        { error && <Error /> }
+        { (!loading && articles.length > 0) && (
+          <NewsList articles={articles} />
+        ) }
       </Container>
     </>
   );
